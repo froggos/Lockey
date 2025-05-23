@@ -1,4 +1,7 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
+import 'package:lockey_app/models/password.dart';
 
 class NewNote extends StatefulWidget {
   const NewNote({super.key});
@@ -9,8 +12,9 @@ class NewNote extends StatefulWidget {
 
 class _NewNoteState extends State<NewNote> {
   final _formKey = GlobalKey<FormState>();
+  final TextEditingController _passwordTextController = TextEditingController();
 
-  String _newPassword = 'Cb7A506a';
+  String _enteredAccountName = '';
 
   bool _isCapitalChecked = true;
   bool _isLowerChecked = true;
@@ -18,143 +22,237 @@ class _NewNoteState extends State<NewNote> {
   bool _isSpecialChecked = true;
   double _passwordLength = 15;
 
-  void _generatePassword() {
-    _newPassword = 'password';
+  String _generatePassword() {
+    String caracteres =
+        "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#\$%^&*()_+{}[]";
+
+    if (!_isCapitalChecked) {
+      caracteres = caracteres.replaceAll(RegExp(r'[A-Z]'), '');
+    }
+
+    if (!_isLowerChecked) {
+      caracteres = caracteres.replaceAll(RegExp(r'[a-z]'), '');
+    }
+
+    if (!_isNumbersChecked) {
+      caracteres = caracteres.replaceAll(RegExp(r'[0-9]'), '');
+    }
+
+    if (!_isSpecialChecked) {
+      caracteres = caracteres.replaceAll(RegExp(r'[!@#\$%^&*()_+{}\[\]]'), '');
+    }
+
+    if (caracteres.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Selecciona al menos un tipo de caracter'),
+        ),
+      );
+
+      return '';
+    }
+
+    final random = Random.secure();
+
+    return String.fromCharCodes(Iterable.generate(_passwordLength.toInt(),
+        (_) => caracteres.codeUnitAt(random.nextInt(caracteres.length))));
+  }
+
+  void _savePassword() {
+    if (_formKey.currentState!.validate()) {
+      _formKey.currentState!.save();
+      Navigator.of(context).pop(
+        Password(
+          id: DateTime.now().toString(),
+          accountName: _enteredAccountName,
+          password: _passwordTextController.text,
+        ),
+      );
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    if (_passwordTextController.text.isEmpty) {
+      _passwordTextController.text = _generatePassword();
+    }
+  }
+
+  @override
+  void dispose() {
+    _passwordTextController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final bottomInset = MediaQuery.of(context).viewInsets.bottom;
+
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         title: const Text('Generar contraseña'),
       ),
       body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(17),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextFormField(
-                        initialValue: _newPassword,
-                        style: Theme.of(context)
-                            .textTheme
-                            .titleLarge!
-                            .copyWith(color: Colors.white),
-                      ),
+        padding: EdgeInsets.only(
+          left: 17,
+          right: 17,
+          top: 17,
+          bottom: bottomInset > 0 ? bottomInset + 16 : 80,
+        ),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      controller: _passwordTextController,
+                      style: Theme.of(context)
+                          .textTheme
+                          .titleMedium!
+                          .copyWith(color: Colors.white),
                     ),
-                    IconButton(
-                      onPressed: () {},
-                      icon: const Icon(Icons.refresh),
-                    ),
-                  ],
-                ),
-                TextFormField(
-                  maxLength: 50,
-                  decoration: const InputDecoration(
-                    label: Text('Nombre de cuenta'),
+                  ),
+                  IconButton(
+                    onPressed: () {
+                      setState(() {
+                        _passwordTextController.text = _generatePassword();
+                      });
+                    },
+                    icon: const Icon(Icons.refresh),
+                  ),
+                ],
+              ),
+              TextFormField(
+                maxLength: 50,
+                style: const TextStyle(color: Colors.white),
+                decoration: const InputDecoration(
+                  label: Text(
+                    'Nombre de cuenta',
                   ),
                 ),
-                const SizedBox(height: 7),
-                Text(
-                  'Longitud',
+                onSaved: (value) {
+                  _enteredAccountName = value!;
+                },
+              ),
+              const SizedBox(height: 7),
+              Text(
+                'Longitud',
+                style: Theme.of(context)
+                    .textTheme
+                    .titleMedium!
+                    .copyWith(color: Colors.white),
+              ),
+              SliderTheme(
+                data: SliderTheme.of(context).copyWith(
+                  showValueIndicator: ShowValueIndicator.always,
+                ),
+                child: Slider(
+                  value: _passwordLength,
+                  onChanged: (newLength) {
+                    setState(() {
+                      _passwordLength = newLength;
+                      _passwordTextController.text = _generatePassword();
+                    });
+                  },
+                  label: _passwordLength.toStringAsFixed(0),
+                  min: 10,
+                  max: 30,
+                ),
+              ),
+              CheckboxListTile(
+                contentPadding: EdgeInsets.zero,
+                title: Text(
+                  "Mayúsculas (ABC)",
                   style: Theme.of(context)
                       .textTheme
                       .titleMedium!
                       .copyWith(color: Colors.white),
                 ),
-                SliderTheme(
-                  data: SliderTheme.of(context).copyWith(
-                    showValueIndicator: ShowValueIndicator.always,
-                  ),
-                  child: Slider(
-                    value: _passwordLength,
-                    onChanged: (newLength) {
-                      setState(() {
-                        _passwordLength = newLength;
-                      });
-                    },
-                    label: _passwordLength.toStringAsFixed(0),
-                    min: 10,
-                    max: 30,
-                  ),
+                value: _isCapitalChecked,
+                onChanged: (value) {
+                  setState(() {
+                    _isCapitalChecked = value ?? false;
+                    _passwordTextController.text = _generatePassword();
+                  });
+                },
+                controlAffinity: ListTileControlAffinity.leading,
+              ),
+              CheckboxListTile(
+                contentPadding: EdgeInsets.zero,
+                title: Text(
+                  "Minúsculas (abc)",
+                  style: Theme.of(context)
+                      .textTheme
+                      .titleMedium!
+                      .copyWith(color: Colors.white),
                 ),
-                CheckboxListTile(
-                  contentPadding: EdgeInsets.zero,
-                  title: Text(
-                    "Mayusculas (ABC)",
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleMedium!
-                        .copyWith(color: Colors.white),
-                  ),
-                  value: _isCapitalChecked,
-                  onChanged: (value) {
-                    setState(() {
-                      _isCapitalChecked = value ?? false;
-                    });
-                  },
-                  controlAffinity: ListTileControlAffinity.leading,
+                value: _isLowerChecked,
+                onChanged: (value) {
+                  setState(() {
+                    _isLowerChecked = value ?? false;
+                    _passwordTextController.text = _generatePassword();
+                  });
+                },
+                controlAffinity: ListTileControlAffinity.leading,
+              ),
+              CheckboxListTile(
+                contentPadding: EdgeInsets.zero,
+                title: Text(
+                  "Números (123)",
+                  style: Theme.of(context)
+                      .textTheme
+                      .titleMedium!
+                      .copyWith(color: Colors.white),
                 ),
-                CheckboxListTile(
-                  contentPadding: EdgeInsets.zero,
-                  title: Text(
-                    "Minusculas (abc)",
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleMedium!
-                        .copyWith(color: Colors.white),
-                  ),
-                  value: _isLowerChecked,
-                  onChanged: (value) {
-                    setState(() {
-                      _isLowerChecked = value ?? false;
-                    });
-                  },
-                  controlAffinity: ListTileControlAffinity.leading,
+                value: _isNumbersChecked,
+                onChanged: (value) {
+                  setState(() {
+                    _isNumbersChecked = value ?? false;
+                    _passwordTextController.text = _generatePassword();
+                  });
+                },
+                controlAffinity: ListTileControlAffinity.leading,
+              ),
+              CheckboxListTile(
+                contentPadding: EdgeInsets.zero,
+                title: Text(
+                  "Especiales ({}[]!@#)",
+                  style: Theme.of(context)
+                      .textTheme
+                      .titleMedium!
+                      .copyWith(color: Colors.white),
                 ),
-                CheckboxListTile(
-                  contentPadding: EdgeInsets.zero,
-                  title: Text(
-                    "Numeros (123)",
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleMedium!
-                        .copyWith(color: Colors.white),
-                  ),
-                  value: _isNumbersChecked,
-                  onChanged: (value) {
-                    setState(() {
-                      _isNumbersChecked = value ?? false;
-                    });
-                  },
-                  controlAffinity: ListTileControlAffinity.leading,
-                ),
-                CheckboxListTile(
-                  contentPadding: EdgeInsets.zero,
-                  title: Text(
-                    "Especiales ({}[]!@#)",
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleMedium!
-                        .copyWith(color: Colors.white),
-                  ),
-                  value: _isSpecialChecked,
-                  onChanged: (value) {
-                    setState(() {
-                      _isSpecialChecked = value ?? false;
-                    });
-                  },
-                  controlAffinity: ListTileControlAffinity.leading,
-                ),
-              ],
-            ),
+                value: _isSpecialChecked,
+                onChanged: (value) {
+                  setState(() {
+                    _isSpecialChecked = value ?? false;
+                    _passwordTextController.text = _generatePassword();
+                  });
+                },
+                controlAffinity: ListTileControlAffinity.leading,
+              ),
+            ],
           ),
+        ),
+      ),
+      bottomNavigationBar: Padding(
+        padding: EdgeInsets.only(
+          left: 16,
+          right: 16,
+          bottom: MediaQuery.of(context).viewInsets.bottom + 16,
+        ),
+        child: ElevatedButton(
+          onPressed: _savePassword,
+          style: ElevatedButton.styleFrom(
+            minimumSize: const Size.fromHeight(50),
+          ),
+          child: const Text('Guardar'),
         ),
       ),
     );
