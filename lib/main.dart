@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lockey_app/screens/password_list.dart';
 
-void main() {
+void main() async {
   runApp(const Lockey());
 }
 

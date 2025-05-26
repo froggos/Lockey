@@ -2,15 +2,16 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:lockey_app/models/password.dart';
+import 'package:lockey_app/store/storage.dart';
 
-class NewNote extends StatefulWidget {
-  const NewNote({super.key});
+class NewPassword extends StatefulWidget {
+  const NewPassword({super.key});
 
   @override
-  State<NewNote> createState() => _NewNoteState();
+  State<NewPassword> createState() => _NewNoteState();
 }
 
-class _NewNoteState extends State<NewNote> {
+class _NewNoteState extends State<NewPassword> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _passwordTextController = TextEditingController();
 
@@ -58,16 +59,21 @@ class _NewNoteState extends State<NewNote> {
         (_) => caracteres.codeUnitAt(random.nextInt(caracteres.length))));
   }
 
-  void _savePassword() {
+  void _savePassword() async {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
-      Navigator.of(context).pop(
-        Password(
-          id: DateTime.now().toString(),
-          accountName: _enteredAccountName,
-          password: _passwordTextController.text,
-        ),
+
+      final newPassword = Password(
+        id: DateTime.now().toString(),
+        accountName: _enteredAccountName,
+        password: _passwordTextController.text,
       );
+
+      final navigator = Navigator.of(context);
+
+      await LockeyStorage.savePassword(newPassword);
+
+      navigator.pop(newPassword);
     }
   }
 
@@ -129,6 +135,13 @@ class _NewNoteState extends State<NewNote> {
                 ],
               ),
               TextFormField(
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Ingrese un nombre';
+                  }
+
+                  return null;
+                },
                 maxLength: 50,
                 style: const TextStyle(color: Colors.white),
                 decoration: const InputDecoration(
