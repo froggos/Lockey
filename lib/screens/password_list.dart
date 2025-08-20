@@ -83,30 +83,66 @@ class _PasswordList extends State<PasswordList> {
     );
 
     if (_filteredList.isNotEmpty) {
-      content = ListView.builder(
+      content = ListView.separated(
+        separatorBuilder: (_, __) => const SizedBox(
+          height: 0,
+        ),
         itemCount: _filteredList.length,
         itemBuilder: (ctx, index) => Dismissible(
+          direction: DismissDirection.endToStart,
           background: Container(
-            color: Colors.red,
+            color: const Color(0xFFB53939),
           ),
           key: ValueKey(_filteredList[index].id),
+          confirmDismiss: (direction) async {
+            return await showDialog(
+              context: context,
+              builder: (context) => AlertDialog(
+                title: const Text('Confirmar eliminacion'),
+                content: Text(
+                    '¿Realmente deseas eliminar ${_filteredList[index].accountName}?'),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(false),
+                    child: const Text(
+                      'Cancelar',
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(true),
+                    child: const Text('Confirmar'),
+                  ),
+                ],
+              ),
+            );
+          },
           onDismissed: (direction) {
             _removePassword(_filteredList[index]);
           },
-          child: ListTile(
-            title: Text(_filteredList[index].password),
-            subtitle: Text(_filteredList[index].accountName),
-            onTap: () {
-              ScaffoldMessenger.of(context).hideCurrentSnackBar();
-              Clipboard.setData(
-                  ClipboardData(text: _filteredList[index].password));
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                      'Se ha copiado la contraseña de ${_filteredList[index].accountName}'),
-                ),
-              );
-            },
+          child: Container(
+            decoration: const BoxDecoration(
+              color: Color(0xFF333A5A),
+              border: Border(
+                  bottom: BorderSide(
+                color: Color(0xFF2C324E),
+                width: 1,
+              )),
+            ),
+            child: ListTile(
+              title: Text(_filteredList[index].password),
+              subtitle: Text(_filteredList[index].accountName),
+              onTap: () {
+                ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                Clipboard.setData(
+                    ClipboardData(text: _filteredList[index].password));
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                        'Se ha copiado la contraseña de ${_filteredList[index].accountName}'),
+                  ),
+                );
+              },
+            ),
           ),
         ),
       );
