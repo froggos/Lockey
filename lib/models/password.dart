@@ -1,22 +1,24 @@
+import 'package:lockey_app/models/category.dart';
+
 class Password {
   const Password({
     required this.id,
     required this.accountName,
     required this.password,
-    this.groupId,
+    this.category,
   });
 
   final String id;
   final String accountName;
   final String password;
-  final int? groupId;
+  final Category? category;
 
   Map<String, dynamic> toJson() {
     return {
       'id': id,
       'accountName': accountName,
       'password': password,
-      if (groupId != null) 'groupId': groupId,
+      if (category != null) 'category': category,
     };
   }
 
@@ -25,7 +27,7 @@ class Password {
       id: json['id'],
       accountName: json['accountName'],
       password: json['password'],
-      groupId: json['groupId'],
+      category: json['category'],
     );
   }
 }

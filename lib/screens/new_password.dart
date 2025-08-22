@@ -154,6 +154,16 @@ class _NewNoteState extends State<NewPassword> {
                 },
               ),
               const SizedBox(height: 7),
+              DropdownButtonFormField<String>(
+                items: const [
+                  DropdownMenuItem(
+                      child: Text(
+                    "Trabajo",
+                  )),
+                ],
+                onChanged: (onChanged) {},
+              ),
+              const SizedBox(height: 7),
               Text(
                 'Longitud',
                 style: Theme.of(context)

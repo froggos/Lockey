@@ -15,11 +15,12 @@ class Lockey extends StatelessWidget {
       title: 'Lockey',
       theme: ThemeData.dark().copyWith(
         colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color.fromARGB(255, 147, 229, 250),
+          seedColor: const Color(0xFF161A27),
           brightness: Brightness.dark,
-          surface: const Color.fromARGB(255, 42, 51, 59),
+        ).copyWith(
+          surface: const Color(0xFF161A27),
         ),
-        scaffoldBackgroundColor: const Color.fromARGB(255, 50, 58, 60),
+        scaffoldBackgroundColor: const Color(0xFF161A27),
         textTheme: GoogleFonts.latoTextTheme(),
       ),
       home: const PasswordList(),

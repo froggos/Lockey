@@ -64,6 +64,8 @@ class _PasswordList extends State<PasswordList> {
     });
   }
 
+  void showPasswords() {}
+
   @override
   void initState() {
     super.initState();
@@ -91,7 +93,7 @@ class _PasswordList extends State<PasswordList> {
         itemBuilder: (ctx, index) => Dismissible(
           direction: DismissDirection.endToStart,
           background: Container(
-            color: const Color(0xFFB53939),
+            color: const Color(0xFFB53C3C),
           ),
           key: ValueKey(_filteredList[index].id),
           confirmDismiss: (direction) async {
@@ -121,27 +123,38 @@ class _PasswordList extends State<PasswordList> {
           },
           child: Container(
             decoration: const BoxDecoration(
-              color: Color(0xFF333A5A),
+              color: Color(0xFF1E2334),
               border: Border(
-                  bottom: BorderSide(
-                color: Color(0xFF2C324E),
-                width: 1,
-              )),
+                bottom: BorderSide(
+                  color: Color(0xFF343D5B),
+                  width: 1,
+                ),
+              ),
             ),
-            child: ListTile(
-              title: Text(_filteredList[index].password),
-              subtitle: Text(_filteredList[index].accountName),
-              onTap: () {
-                ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                Clipboard.setData(
-                    ClipboardData(text: _filteredList[index].password));
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                        'Se ha copiado la contraseña de ${_filteredList[index].accountName}'),
+            child: Container(
+              decoration: const BoxDecoration(
+                border: Border(
+                  left: BorderSide(
+                    color: Color(0xFF3758A6),
+                    width: 8,
                   ),
-                );
-              },
+                ),
+              ),
+              child: ListTile(
+                title: Text(_filteredList[index].password),
+                subtitle: Text(_filteredList[index].accountName),
+                onTap: () {
+                  ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                  Clipboard.setData(
+                      ClipboardData(text: _filteredList[index].password));
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                          'Se ha copiado la contraseña de ${_filteredList[index].accountName}'),
+                    ),
+                  );
+                },
+              ),
             ),
           ),
         ),
@@ -149,6 +162,10 @@ class _PasswordList extends State<PasswordList> {
     }
 
     return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        onPressed: _createPassword,
+        child: const Icon(Icons.add),
+      ),
       appBar: AppBar(
         title: _isSearching
             ? TextField(
@@ -180,8 +197,8 @@ class _PasswordList extends State<PasswordList> {
                   icon: const Icon(Icons.search),
                 ),
           IconButton(
-            onPressed: _createPassword,
-            icon: const Icon(Icons.add),
+            onPressed: () {},
+            icon: const Icon(Icons.remove_red_eye_outlined),
           )
         ],
       ),
