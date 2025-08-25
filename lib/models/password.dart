@@ -27,7 +27,12 @@ class Password {
       id: json['id'],
       accountName: json['accountName'],
       password: json['password'],
-      category: json['category'],
+      category: json.containsKey("category")
+          ? Category(
+              colorCode: json['category']['colorCode'],
+              name: json['category']['name'],
+              id: json['category']['id'])
+          : null,
     );
   }
 }

@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:lockey_app/models/category.dart';
 import 'package:lockey_app/models/password.dart';
 import 'package:lockey_app/store/storage.dart';
 
@@ -14,8 +15,10 @@ class NewPassword extends StatefulWidget {
 class _NewNoteState extends State<NewPassword> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _passwordTextController = TextEditingController();
+  final List<Category> _defaultCategories = [];
 
   String _enteredAccountName = '';
+  Category? _selectedCategory;
 
   bool _isCapitalChecked = true;
   bool _isLowerChecked = true;
@@ -67,6 +70,7 @@ class _NewNoteState extends State<NewPassword> {
         id: DateTime.now().toString(),
         accountName: _enteredAccountName,
         password: _passwordTextController.text,
+        category: _selectedCategory,
       );
 
       final navigator = Navigator.of(context);
@@ -77,9 +81,19 @@ class _NewNoteState extends State<NewPassword> {
     }
   }
 
+  Future<void> _loadCategories() async {
+    final actualList = await LockeyStorage.getCategories();
+
+    setState(() {
+      _defaultCategories.addAll(actualList);
+    });
+  }
+
   @override
   void initState() {
     super.initState();
+
+    _loadCategories();
 
     if (_passwordTextController.text.isEmpty) {
       _passwordTextController.text = _generatePassword();
@@ -117,6 +131,20 @@ class _NewNoteState extends State<NewPassword> {
                 children: [
                   Expanded(
                     child: TextFormField(
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: const Color(0xFF4A5782),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 15,
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(40),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(40),
+                        ),
+                      ),
                       controller: _passwordTextController,
                       style: Theme.of(context)
                           .textTheme
@@ -134,6 +162,7 @@ class _NewNoteState extends State<NewPassword> {
                   ),
                 ],
               ),
+              const SizedBox(height: 27),
               TextFormField(
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -144,9 +173,21 @@ class _NewNoteState extends State<NewPassword> {
                 },
                 maxLength: 50,
                 style: const TextStyle(color: Colors.white),
-                decoration: const InputDecoration(
-                  label: Text(
-                    'Nombre de cuenta',
+                decoration: InputDecoration(
+                  hintText: 'Nombre de cuenta',
+                  filled: true,
+                  fillColor: const Color(0xFF252C41),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 15,
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(40),
+                    borderSide: const BorderSide(color: Color(0xFF252C41)),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(40),
+                    borderSide: const BorderSide(color: Color(0xFF252C41)),
                   ),
                 ),
                 onSaved: (value) {
@@ -154,16 +195,43 @@ class _NewNoteState extends State<NewPassword> {
                 },
               ),
               const SizedBox(height: 7),
-              DropdownButtonFormField<String>(
-                items: const [
-                  DropdownMenuItem(
-                      child: Text(
-                    "Trabajo",
-                  )),
-                ],
-                onChanged: (onChanged) {},
+              DropdownButtonFormField<Category>(
+                decoration: InputDecoration(
+                  hintText: 'Selecciona una categoria',
+                  filled: true,
+                  fillColor: const Color(0xFF252C41),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 15,
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(40),
+                    borderSide: const BorderSide(color: Color(0xFF252C41)),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(40),
+                    borderSide: const BorderSide(color: Color(0xFF252C41)),
+                  ),
+                ),
+                value: null,
+                items: _defaultCategories.map((Category category) {
+                  return DropdownMenuItem<Category>(
+                    value: category,
+                    child: Text(
+                      category.name,
+                      style: const TextStyle(
+                        color: Colors.white,
+                      ),
+                    ),
+                  );
+                }).toList(),
+                onChanged: (Category? newCategory) {
+                  setState(() {
+                    _selectedCategory = newCategory;
+                  });
+                },
               ),
-              const SizedBox(height: 7),
+              const SizedBox(height: 20),
               Text(
                 'Longitud',
                 style: Theme.of(context)
@@ -174,6 +242,7 @@ class _NewNoteState extends State<NewPassword> {
               SliderTheme(
                 data: SliderTheme.of(context).copyWith(
                   showValueIndicator: ShowValueIndicator.always,
+                  activeTrackColor: const Color(0xFF52618E),
                 ),
                 child: Slider(
                   value: _passwordLength,

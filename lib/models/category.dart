@@ -2,10 +2,11 @@ class Category {
   Category({
     required this.colorCode,
     required this.name,
-  }) : id = DateTime.now().millisecondsSinceEpoch.toString();
+    String? id,
+  }) : id = id ?? DateTime.now().millisecondsSinceEpoch.toString();
 
   final String id;
-  final String colorCode;
+  final int colorCode;
   final String name;
 
   Map<String, dynamic> toJson() {
@@ -14,5 +15,13 @@ class Category {
       'colorCode': colorCode,
       'name': name,
     };
+  }
+
+  factory Category.fromJson(Map<String, dynamic> json) {
+    return Category(
+      colorCode: json['colorCode'],
+      name: json['name'],
+      id: json['id'],
+    );
   }
 }

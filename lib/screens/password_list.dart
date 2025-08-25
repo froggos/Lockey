@@ -132,10 +132,12 @@ class _PasswordList extends State<PasswordList> {
               ),
             ),
             child: Container(
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 border: Border(
                   left: BorderSide(
-                    color: Color(0xFF3758A6),
+                    color: Color(_filteredList[index].category != null
+                        ? _filteredList[index].category!.colorCode
+                        : 0xFF3758A6),
                     width: 8,
                   ),
                 ),
